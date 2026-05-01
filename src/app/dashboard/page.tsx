@@ -1,11 +1,10 @@
-import { RolePage } from "@/components/role-page"
+import { DashboardContent } from "@/components/dashboard/dashboard-content"
+import { ProtectedRoute } from "@/components/protected-route"
 
 export default function DashboardPage() {
   return (
-    <RolePage
-      title="User Dashboard"
-      description="Welcome — you are signed in as a user."
-      allowedRoles={["user"]}
-    />
+    <ProtectedRoute allowedRoles={["user"]}>
+      <DashboardContent />
+    </ProtectedRoute>
   )
 }
