@@ -4,6 +4,7 @@ import { Settings } from "lucide-react"
 import Link from "next/link"
 
 import { Button, buttonVariants } from "@/components/ui/button"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { useAuth, type UserRole } from "@/contexts/AuthContext"
 
 const NAV_LINKS: Record<UserRole, { href: string; label: string }[]> = {
@@ -58,11 +59,14 @@ export function Header() {
                   <Settings />
                 </Link>
               ) : null}
+              <ThemeToggle />
               <Button size="sm" variant="outline" onClick={logout}>
                 Log out
               </Button>
             </>
-          ) : null}
+          ) : (
+            <ThemeToggle />
+          )}
         </div>
       </div>
     </header>
