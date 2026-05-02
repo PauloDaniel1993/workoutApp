@@ -1,11 +1,10 @@
-import { RolePage } from "@/components/role-page"
+import { AdminContent } from "@/components/admin/admin-content"
+import { ProtectedRoute } from "@/components/protected-route"
 
 export default function AdminPage() {
   return (
-    <RolePage
-      title="Admin Dashboard"
-      description="Welcome — you are signed in as an admin."
-      allowedRoles={["admin"]}
-    />
+    <ProtectedRoute allowedRoles={["admin"]}>
+      <AdminContent />
+    </ProtectedRoute>
   )
 }

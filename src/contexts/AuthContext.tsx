@@ -45,6 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     const token = getStoredToken()
     if (!token) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStatus("unauthenticated")
       return
     }

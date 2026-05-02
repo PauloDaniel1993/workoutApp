@@ -260,3 +260,94 @@ export function toggleExerciseCompleted(
   exercise.completed = completed
   return { ok: true, workout: toApi(workout, user.id) }
 }
+
+export function getWorkoutsForEmail(
+  user: { id: string; email: string },
+  weekStartIso?: string
+): Workout[] {
+  return workouts
+    .filter((w) => w.userEmail === user.email.toLowerCase())
+    .filter((w) => (weekStartIso ? inWeek(w.date, weekStartIso) : true))
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .map((w) => toApi(w, user.id))
+}
+
+export interface CreateWorkoutInput {
+  userEmail: string
+  date: string
+  name: string
+  exercises: Array<{
+    name: string
+    sets: number
+    reps: number
+    weight: number
+    youtubeUrl: string
+  }>
+}
+
+export function createWorkoutForUser(
+  input: CreateWorkoutInput,
+  userId: string
+): Workout {
+  const stored: StoredWorkout = {
+    id: randomUUID(),
+    userEmail: input.userEmail.toLowerCase(),
+    date: input.date,
+    name: input.name,
+    exercises: input.exercises.map((e) => ({
+      id: randomUUID(),
+      name: e.name,
+      sets: e.sets,
+      reps: e.reps,
+      weight: e.weight,
+      youtubeUrl: e.youtubeUrl,
+      completed: false,
+    })),
+  }
+  workouts.push(stored)
+  return toApi(stored, userId)
+}
+
+export interface UpdateWorkoutInput {
+  date?: string
+  name?: string
+  exercises?: Array<{
+    id?: string
+    name: string
+    sets: number
+    reps: number
+    weight: number
+    youtubeUrl: string
+  }>
+}
+
+export function updateWorkoutById(
+  workoutId: string,
+  patch: UpdateWorkoutInput,
+  userId: string
+): Workout | null {
+  const stored = workouts.find((w) => w.id === workoutId)
+  if (!stored) return null
+  if (patch.date !== undefined) stored.date = patch.date
+  if (patch.name !== undefined) stored.name = patch.name
+  if (patch.exercises !== undefined) {
+    const previous = new Map(stored.exercises.map((e) => [e.id, e]))
+    stored.exercises = patch.exercises.map((e) => {
+      const prior = e.id ? previous.get(e.id) : undefined
+      return {
+        id: prior?.id ?? randomUUID(),
+        name: e.name,
+        sets: e.sets,
+        reps: e.reps,
+        weight: e.weight,
+        youtubeUrl: e.youtubeUrl,
+        completed: prior?.completed ?? false,
+      }
+    })
+  }
+  return toApi(stored, userId)
+}
+
+export function countWorkouts(): number {
+  return workouts.length
+}

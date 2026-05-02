@@ -1,11 +1,10 @@
-import { RolePage } from "@/components/role-page"
+import { ProtectedRoute } from "@/components/protected-route"
+import { TrainerContent } from "@/components/trainer/trainer-content"
 
 export default function TrainerPage() {
   return (
-    <RolePage
-      title="Trainer Dashboard"
-      description="Welcome — you are signed in as a trainer."
-      allowedRoles={["trainer"]}
-    />
+    <ProtectedRoute allowedRoles={["trainer"]}>
+      <TrainerContent />
+    </ProtectedRoute>
   )
 }

@@ -6,6 +6,7 @@ export interface User {
   name: string
   role: UserRole
   passwordHash: string
+  createdAt: string
 }
 
 export interface PublicUser {
@@ -13,6 +14,7 @@ export interface PublicUser {
   email: string
   name: string
   role: UserRole
+  createdAt?: string
 }
 
 export interface JwtPayload {
