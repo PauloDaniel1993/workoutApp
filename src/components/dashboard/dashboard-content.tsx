@@ -91,6 +91,7 @@ export function DashboardContent() {
         onChangeWeek={setWeekStart}
         onSelectWorkout={handleSelect}
         loading={loading}
+        orientation="vertical"
       />
 
       <ExerciseDetailDialog
