@@ -5,6 +5,7 @@ import * as React from "react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { WeeklyCalendar } from "@/components/dashboard/weekly-calendar"
 import { WorkoutDetailDialog } from "@/components/trainer/workout-detail-dialog"
 import { WorkoutFormDialog } from "@/components/trainer/workout-form-dialog"
@@ -77,44 +78,46 @@ export function UsersPanel({ users }: Props) {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-[240px_1fr]">
+    <div className="grid gap-4 md:h-full md:grid-cols-[240px_1fr] md:overflow-hidden">
       <Card size="sm">
         <CardHeader>
           <CardTitle>Users</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="md:flex md:min-h-0 md:flex-1 md:flex-col md:overflow-hidden">
           {users.length === 0 ? (
             <p className="text-sm text-muted-foreground">No users assigned.</p>
           ) : (
-            <ul className="flex flex-col gap-1">
-              {users.map((u) => {
-                const active = u.id === selectedId
-                return (
-                  <li key={u.id}>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedId(u.id)}
-                      className={
-                        "w-full rounded-md px-2 py-1.5 text-left text-sm transition-colors " +
-                        (active
-                          ? "bg-muted text-foreground"
-                          : "text-foreground/80 hover:bg-muted/60")
-                      }
-                    >
-                      <div className="font-medium">{u.name}</div>
-                      <div className="truncate text-xs text-muted-foreground">
-                        {u.email}
-                      </div>
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
+            <ScrollArea className="md:h-full">
+              <ul className="flex flex-col gap-1">
+                {users.map((u) => {
+                  const active = u.id === selectedId
+                  return (
+                    <li key={u.id}>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedId(u.id)}
+                        className={
+                          "w-full rounded-md px-2 py-1.5 text-left text-sm transition-colors " +
+                          (active
+                            ? "bg-muted text-foreground"
+                            : "text-foreground/80 hover:bg-muted/60")
+                        }
+                      >
+                        <div className="font-medium">{u.name}</div>
+                        <div className="truncate text-xs text-muted-foreground">
+                          {u.email}
+                        </div>
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+            </ScrollArea>
           )}
         </CardContent>
       </Card>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 md:min-h-0 md:overflow-hidden">
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-base font-semibold">
             {selectedId
@@ -126,33 +129,35 @@ export function UsersPanel({ users }: Props) {
           </Button>
         </div>
 
-        {error ? (
-          <p role="alert" className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            {error}
-          </p>
-        ) : null}
+        <div className="flex flex-col gap-3 md:min-h-0 md:flex-1 md:overflow-y-auto">
+          {error ? (
+            <p role="alert" className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {error}
+            </p>
+          ) : null}
 
-        {selectedId ? (
-          <WeeklyCalendar
-            weekStart={weekStart}
-            workouts={workouts}
-            onChangeWeek={setWeekStart}
-            onSelectWorkout={(w) => {
-              setDetailWorkout(w)
-              setDetailOpen(true)
-            }}
-            loading={loading}
-          />
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            Pick a user from the list to view their plan.
-          </p>
-        )}
+          {selectedId ? (
+            <WeeklyCalendar
+              weekStart={weekStart}
+              workouts={workouts}
+              onChangeWeek={setWeekStart}
+              onSelectWorkout={(w) => {
+                setDetailWorkout(w)
+                setDetailOpen(true)
+              }}
+              loading={loading}
+            />
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Pick a user from the list to view their plan.
+            </p>
+          )}
 
-        <p className="text-xs text-muted-foreground">
-          <Pencil className="mr-1 inline size-3 align-text-bottom" />
-          Tap a workout to view exercises and edit.
-        </p>
+          <p className="text-xs text-muted-foreground">
+            <Pencil className="mr-1 inline size-3 align-text-bottom" />
+            Tap a workout to view exercises and edit.
+          </p>
+        </div>
       </div>
 
       <WorkoutDetailDialog

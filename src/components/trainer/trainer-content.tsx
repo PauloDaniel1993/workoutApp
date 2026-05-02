@@ -42,7 +42,7 @@ export function TrainerContent() {
   }, [])
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-6 sm:px-6 sm:py-10">
+    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-6 sm:px-6 sm:py-10 md:overflow-hidden">
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-semibold">
           Hey{user ? `, ${user.name.split(" ")[0]}` : ""} 👋
@@ -58,14 +58,14 @@ export function TrainerContent() {
         </p>
       ) : null}
 
-      <Tabs defaultValue="users" className="gap-4">
+      <Tabs defaultValue="users" className="gap-4 md:min-h-0 md:flex-1">
         <TabsList>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="create">Create workout</TabsTrigger>
           <TabsTrigger value="requests">Requests</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="users">
+        <TabsContent value="users" className="md:min-h-0 md:overflow-hidden">
           {loading ? (
             <p className="text-sm text-muted-foreground">Loading users…</p>
           ) : (
