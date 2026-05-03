@@ -23,6 +23,7 @@ export interface WorkoutChangeRequest {
   userName: string
   reason: WorkoutChangeReason
   message: string
+  status: "pending" | "approved" | "rejected"
   createdAt: string
 }
 
@@ -58,6 +59,14 @@ export async function submitWorkoutChangeRequest(
     { method: "POST", body: { reason, message }, auth: true }
   )
   return data.request
+}
+
+export async function fetchMyRequests(): Promise<WorkoutChangeRequest[]> {
+  const data = await apiFetch<{ requests: WorkoutChangeRequest[] }>(
+    "/api/users/requests",
+    { auth: true }
+  )
+  return data.requests
 }
 
 export async function fetchAdminUsers(): Promise<AdminUser[]> {

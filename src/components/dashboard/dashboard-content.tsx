@@ -3,20 +3,28 @@
 import * as React from "react"
 
 import { ExerciseDetailDialog } from "@/components/dashboard/exercise-detail-dialog"
+import { MonthlyCalendar } from "@/components/dashboard/monthly-calendar"
 import { WeeklyCalendar } from "@/components/dashboard/weekly-calendar"
 import { useAuth } from "@/contexts/AuthContext"
+import { useMediaQuery } from "@/hooks/use-media-query"
 import { ApiError } from "@/lib/api"
 import {
   fetchWorkouts,
   isoDate,
+  monthGrid,
+  startOfMonth,
   startOfWeek,
   type Workout,
 } from "@/lib/workouts"
 
 export function DashboardContent() {
   const { user } = useAuth()
+  const isLargeScreen = useMediaQuery("(min-width: 1024px)")
   const [weekStart, setWeekStart] = React.useState<Date>(() =>
     startOfWeek(new Date())
+  )
+  const [monthStart, setMonthStart] = React.useState<Date>(() =>
+    startOfMonth(new Date())
   )
   const [workouts, setWorkouts] = React.useState<Workout[]>([])
   const [loading, setLoading] = React.useState(true)
@@ -29,25 +37,53 @@ export function DashboardContent() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true)
     setError(null)
-    fetchWorkouts(isoDate(weekStart))
-      .then((data) => {
-        if (cancelled) return
-        setWorkouts(data)
-      })
-      .catch((err) => {
-        if (cancelled) return
-        const message =
-          err instanceof ApiError ? err.message : "Failed to load workouts"
-        setError(message)
-        setWorkouts([])
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
+
+    if (isLargeScreen) {
+      const grid = monthGrid(monthStart)
+      const weekStarts: string[] = []
+      for (let i = 0; i < 42; i += 7) {
+        weekStarts.push(isoDate(grid[i]))
+      }
+      Promise.all(weekStarts.map((ws) => fetchWorkouts(ws)))
+        .then((results) => {
+          if (cancelled) return
+          const merged = results.flat()
+          const deduped = Array.from(
+            new Map(merged.map((w) => [w.id, w])).values()
+          )
+          setWorkouts(deduped)
+        })
+        .catch((err) => {
+          if (cancelled) return
+          const message =
+            err instanceof ApiError ? err.message : "Failed to load workouts"
+          setError(message)
+          setWorkouts([])
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false)
+        })
+    } else {
+      fetchWorkouts(isoDate(weekStart))
+        .then((data) => {
+          if (cancelled) return
+          setWorkouts(data)
+        })
+        .catch((err) => {
+          if (cancelled) return
+          const message =
+            err instanceof ApiError ? err.message : "Failed to load workouts"
+          setError(message)
+          setWorkouts([])
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false)
+        })
+    }
     return () => {
       cancelled = true
     }
-  }, [weekStart])
+  }, [weekStart, monthStart, isLargeScreen])
 
   const selected = React.useMemo(
     () => workouts.find((w) => w.id === selectedId) ?? null,
@@ -72,7 +108,9 @@ export function DashboardContent() {
           Hey{user ? `, ${user.name.split(" ")[0]}` : ""} 👋
         </h1>
         <p className="text-sm text-muted-foreground">
-          Here is your weekly training plan. Tap a workout to see the details.
+          {isLargeScreen
+            ? "Here is your monthly training plan. Tap a workout to see the details."
+            : "Here is your weekly training plan. Tap a workout to see the details."}
         </p>
       </header>
 
@@ -85,14 +123,24 @@ export function DashboardContent() {
         </p>
       ) : null}
 
-      <WeeklyCalendar
-        weekStart={weekStart}
-        workouts={workouts}
-        onChangeWeek={setWeekStart}
-        onSelectWorkout={handleSelect}
-        loading={loading}
-        orientation="vertical"
-      />
+      {isLargeScreen ? (
+        <MonthlyCalendar
+          monthStart={monthStart}
+          workouts={workouts}
+          onChangeMonth={setMonthStart}
+          onSelectWorkout={handleSelect}
+          loading={loading}
+        />
+      ) : (
+        <WeeklyCalendar
+          weekStart={weekStart}
+          workouts={workouts}
+          onChangeWeek={setWeekStart}
+          onSelectWorkout={handleSelect}
+          loading={loading}
+          orientation="vertical"
+        />
+      )}
 
       <ExerciseDetailDialog
         workout={selected}

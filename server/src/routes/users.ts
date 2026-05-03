@@ -7,7 +7,7 @@ import {
   setUserPassword,
   updateUser,
 } from "../data/users"
-import { createRequest, REASONS } from "../data/requests"
+import { createRequest, getRequestsForUser, REASONS } from "../data/requests"
 import { requireAuth } from "../middleware/auth"
 import type { WorkoutChangeReason } from "../types/request"
 
@@ -72,6 +72,12 @@ router.patch("/email", (req: Request, res: Response) => {
       role: updated.role,
     },
   })
+})
+
+router.get("/requests", (req: Request, res: Response) => {
+  const claims = req.user!
+  const userRequests = getRequestsForUser(claims.email)
+  return res.json({ requests: userRequests })
 })
 
 router.post("/requests", (req: Request, res: Response) => {

@@ -5,6 +5,8 @@ export type WorkoutChangeReason =
   | "decrease_difficulty"
   | "other"
 
+export type RequestStatus = "pending" | "approved" | "rejected"
+
 export interface WorkoutChangeRequest {
   id: string
   userId: string
@@ -12,5 +14,6 @@ export interface WorkoutChangeRequest {
   userName: string
   reason: WorkoutChangeReason
   message: string
+  status: RequestStatus
   createdAt: string
 }

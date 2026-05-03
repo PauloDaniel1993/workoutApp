@@ -79,3 +79,27 @@ export function formatRange(weekStart: Date): string {
     d.toLocaleDateString(undefined, { month: "short", day: "numeric" })
   return `${fmt(weekStart)} – ${fmt(end)}`
 }
+
+export function startOfMonth(d: Date): Date {
+  const x = startOfDay(d)
+  x.setDate(1)
+  return x
+}
+
+export function daysInMonth(d: Date): number {
+  const year = d.getFullYear()
+  const month = d.getMonth()
+  return new Date(year, month + 1, 0).getDate()
+}
+
+export function monthGrid(d: Date): Date[] {
+  const first = startOfMonth(d)
+  const dayOfWeek = first.getDay()
+  const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+  const gridStart = addDays(first, mondayOffset)
+  return Array.from({ length: 42 }, (_, i) => addDays(gridStart, i))
+}
+
+export function formatMonth(d: Date): string {
+  return d.toLocaleDateString(undefined, { month: "long", year: "numeric" })
+}

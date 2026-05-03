@@ -11,7 +11,8 @@ import {
   getWorkoutsForEmail,
   updateWorkoutById,
 } from "../data/workouts"
-import { listRequests } from "../data/requests"
+import { listRequests, updateRequestStatus } from "../data/requests"
+import type { RequestStatus } from "../types/request"
 import { requireAuth, requireRole } from "../middleware/auth"
 
 const router = Router()
@@ -135,6 +136,23 @@ router.put("/workouts/:id", (req: Request, res: Response) => {
   )
   if (!updated) return res.status(404).json({ error: "Workout not found" })
   return res.json({ workout: updated })
+})
+
+const VALID_REQUEST_STATUSES: RequestStatus[] = ["approved", "rejected"]
+
+router.patch("/requests/:id", (req: Request, res: Response) => {
+  const { status } = (req.body ?? {}) as { status?: unknown }
+  if (
+    typeof status !== "string" ||
+    !VALID_REQUEST_STATUSES.includes(status as RequestStatus)
+  ) {
+    return res
+      .status(400)
+      .json({ error: 'Status must be "approved" or "rejected"' })
+  }
+  const updated = updateRequestStatus(String(req.params.id), status as RequestStatus)
+  if (!updated) return res.status(404).json({ error: "Request not found" })
+  return res.json({ request: updated })
 })
 
 router.get("/requests", (_req: Request, res: Response) => {

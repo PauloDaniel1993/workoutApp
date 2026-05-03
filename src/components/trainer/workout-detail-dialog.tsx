@@ -40,7 +40,7 @@ export function WorkoutDetailDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center justify-between gap-2 pr-6">
             <DialogTitle>{workout.name}</DialogTitle>
             <WorkoutStatusBadge status={workout.status} />
           </div>

@@ -21,6 +21,11 @@ app.use("/api/users", usersRouter)
 app.use("/api/trainer", trainerRouter)
 app.use("/api/admin", adminRouter)
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server listening on http://localhost:${PORT}`)
+})
+
+server.on("error", (err: Error) => {
+  console.error("Server error:", err)
+  process.exit(1)
 })

@@ -64,3 +64,14 @@ export async function fetchWorkoutChangeRequests(): Promise<
   )
   return data.requests
 }
+
+export async function updateRequestStatus(
+  id: string,
+  status: string
+): Promise<WorkoutChangeRequest> {
+  const data = await apiFetch<{ request: WorkoutChangeRequest }>(
+    `/api/trainer/requests/${id}`,
+    { method: "PATCH", body: { status }, auth: true }
+  )
+  return data.request
+}

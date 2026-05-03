@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto"
 
 import type {
+  RequestStatus,
   WorkoutChangeReason,
   WorkoutChangeRequest,
 } from "../types/request"
@@ -28,6 +29,7 @@ function seed() {
       userName: user.name,
       reason: "increase_difficulty",
       message: "Squats feel too easy at this weight — can we bump it up?",
+      status: "pending",
       createdAt: new Date(now - 1000 * 60 * 60 * 24 * 2).toISOString(),
     },
     {
@@ -37,6 +39,7 @@ function seed() {
       userName: user.name,
       reason: "change_schedule",
       message: "Could we move leg day to Saturday going forward?",
+      status: "approved",
       createdAt: new Date(now - 1000 * 60 * 60 * 6).toISOString(),
     }
   )
@@ -64,8 +67,28 @@ export function createRequest(input: {
     userName: input.userName,
     reason: input.reason,
     message: input.message,
+    status: "pending",
     createdAt: new Date().toISOString(),
   }
   requests.push(req)
   return req
+}
+
+export function updateRequestStatus(
+  id: string,
+  status: RequestStatus
+): WorkoutChangeRequest | undefined {
+  const req = requests.find((r) => r.id === id)
+  if (!req) return undefined
+  req.status = status
+  return req
+}
+
+export function getRequestsForUser(
+  userEmail: string
+): WorkoutChangeRequest[] {
+  const email = userEmail.toLowerCase()
+  return requests
+    .filter((r) => r.userEmail.toLowerCase() === email)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 }

@@ -6,14 +6,17 @@ import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { RequestsPanel } from "@/components/trainer/requests-panel"
+import { TrainerDashboard } from "@/components/trainer/trainer-dashboard"
 import { UsersPanel } from "@/components/trainer/users-panel"
 import { WorkoutFormDialog } from "@/components/trainer/workout-form-dialog"
 import { useAuth } from "@/contexts/AuthContext"
+import { useMediaQuery } from "@/hooks/use-media-query"
 import { ApiError } from "@/lib/api"
 import { fetchAssignedUsers } from "@/lib/trainer"
 import type { AdminUser } from "@/lib/users"
 
 export function TrainerContent() {
+  const isLarge = useMediaQuery("(min-width: 1024px)")
   const { user } = useAuth()
   const [users, setUsers] = React.useState<AdminUser[]>([])
   const [loading, setLoading] = React.useState(true)
@@ -40,6 +43,10 @@ export function TrainerContent() {
       cancelled = true
     }
   }, [])
+
+  if (isLarge) {
+    return <TrainerDashboard />
+  }
 
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-6 sm:px-6 sm:py-10 md:overflow-hidden">
