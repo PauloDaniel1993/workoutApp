@@ -1,6 +1,8 @@
 import express from "express"
 import cors from "cors"
+import swaggerUi from "swagger-ui-express"
 
+import { swaggerSpec } from "./swagger"
 import healthRouter from "./routes/health"
 import authRouter from "./routes/auth"
 import workoutsRouter from "./routes/workouts"
@@ -13,6 +15,9 @@ const PORT = Number(process.env.PORT) || 3001
 
 app.use(cors())
 app.use(express.json())
+
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+app.get("/api/docs.json", (_req, res) => res.json(swaggerSpec))
 
 app.use("/api", healthRouter)
 app.use("/api/auth", authRouter)

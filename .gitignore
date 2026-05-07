@@ -22,6 +22,9 @@
 /build
 /server/dist
 
+# prisma
+/server/generated
+
 # misc
 .DS_Store
 *.pem

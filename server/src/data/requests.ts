@@ -1,94 +1,56 @@
-import { randomUUID } from "crypto"
-
-import type {
-  RequestStatus,
-  WorkoutChangeReason,
-  WorkoutChangeRequest,
-} from "../types/request"
-import { findUserByEmail } from "./users"
+import { prisma } from '../lib/prisma'
+import type { RequestStatus, WorkoutChangeReason } from '../types/request'
 
 export const REASONS: WorkoutChangeReason[] = [
-  "change_exercises",
-  "change_schedule",
-  "increase_difficulty",
-  "decrease_difficulty",
-  "other",
+  'change_exercises',
+  'change_schedule',
+  'increase_difficulty',
+  'decrease_difficulty',
+  'other',
 ]
 
-const requests: WorkoutChangeRequest[] = []
-
-function seed() {
-  const user = findUserByEmail("user@test.com")
-  if (!user) return
-  const now = Date.now()
-  requests.push(
-    {
-      id: randomUUID(),
-      userId: user.id,
-      userEmail: user.email,
-      userName: user.name,
-      reason: "increase_difficulty",
-      message: "Squats feel too easy at this weight — can we bump it up?",
-      status: "pending",
-      createdAt: new Date(now - 1000 * 60 * 60 * 24 * 2).toISOString(),
-    },
-    {
-      id: randomUUID(),
-      userId: user.id,
-      userEmail: user.email,
-      userName: user.name,
-      reason: "change_schedule",
-      message: "Could we move leg day to Saturday going forward?",
-      status: "approved",
-      createdAt: new Date(now - 1000 * 60 * 60 * 6).toISOString(),
-    }
-  )
+export async function listRequests() {
+  return prisma.workoutChangeRequest.findMany({
+    orderBy: { createdAt: 'desc' },
+  })
 }
 
-seed()
-
-export function listRequests(): WorkoutChangeRequest[] {
-  return requests
-    .slice()
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-}
-
-export function createRequest(input: {
+export async function createRequest(input: {
   userId: string
-  userEmail: string
-  userName: string
   reason: WorkoutChangeReason
   message: string
-}): WorkoutChangeRequest {
-  const req: WorkoutChangeRequest = {
-    id: randomUUID(),
-    userId: input.userId,
-    userEmail: input.userEmail.toLowerCase(),
-    userName: input.userName,
-    reason: input.reason,
-    message: input.message,
-    status: "pending",
-    createdAt: new Date().toISOString(),
-  }
-  requests.push(req)
-  return req
+}) {
+  return prisma.workoutChangeRequest.create({
+    data: {
+      userId: input.userId,
+      reason: input.reason,
+      message: input.message,
+    },
+  })
 }
 
-export function updateRequestStatus(
+export async function updateRequestStatus(
   id: string,
   status: RequestStatus
-): WorkoutChangeRequest | undefined {
-  const req = requests.find((r) => r.id === id)
-  if (!req) return undefined
-  req.status = status
-  return req
+) {
+  try {
+    return await prisma.workoutChangeRequest.update({
+      where: { id },
+      data: { status },
+    })
+  } catch {
+    return undefined
+  }
 }
 
-export function getRequestsForUser(
-  userEmail: string
-): WorkoutChangeRequest[] {
-  const email = userEmail.toLowerCase()
-  return requests
-    .filter((r) => r.userEmail.toLowerCase() === email)
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+export async function getRequestsForUser(email: string) {
+  const user = await prisma.user.findUnique({
+    where: { email: email.toLowerCase() },
+  })
+  if (!user) return []
+
+  return prisma.workoutChangeRequest.findMany({
+    where: { userId: user.id },
+    orderBy: { createdAt: 'desc' },
+  })
 }
